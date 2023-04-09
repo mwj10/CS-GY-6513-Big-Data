@@ -3,7 +3,7 @@
 ### Install Dokcer
 https://docs.docker.com/engine/install/
 
-### Download and Run Postgres Docker Container via the Command Line
+### Download and Run Postgres Docker Container
 - `docker pull postgres`
 - `docker run --name postgres -e POSTGRES_PASSWORD=123 -d postgres`
 
