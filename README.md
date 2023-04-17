@@ -10,3 +10,13 @@ https://docs.docker.com/engine/install/
 ### Download and Run MangoDB Docker Container
 - `docker pull mongo`
 - `docker run -d -p 27017-27019:27017-27019 --name mango mongo`
+
+
+## Sentiment Analysis
+### Installation
+- `pip install Flask`
+- `pip install transformers`
+- `pip install torch torchvision torchaudio`
+
+
+
