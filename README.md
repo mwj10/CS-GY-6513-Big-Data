@@ -13,6 +13,9 @@ https://docs.docker.com/engine/install/
 
 
 ## Sentiment Analysis
+
+### Dependencies
+python == 3.10
 ### Installation
 - `pip install Flask`
 - `pip install transformers`
