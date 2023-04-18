@@ -30,4 +30,15 @@ python == 3.10
 - To run local.py: with the virtual environment activated, open Terminal and direct to the sentiment-analysis Folder, use the command `python3 local.py`
 
 
+## Frontend
+
+### How to (without docker)
+1. Install dependencies as in `requirements.txt`
+2. Update `config.py` according to your settings
+3. Seed database using `flask db_seed`
+4. Reset seeded database use: `flask db_reset`
+
+
+
+
 
