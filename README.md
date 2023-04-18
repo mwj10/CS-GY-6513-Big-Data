@@ -21,6 +21,10 @@ python == 3.10
 - `pip install transformers`
 - `pip install torch torchvision torchaudio`
 
+### Activate Virtual Environment
+- `. venv/bin/activate`
+
+
 ### To Run the Python Scripts
 - To run app.py: with the virtual environment activated, open Terminal and direct to the sentiment-analysis Folder, use the command `flask --app app run`
 - To run local.py: with the virtual environment activated, open Terminal and direct to the sentiment-analysis Folder, use the command `python3 local.py`
