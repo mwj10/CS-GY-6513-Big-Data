@@ -1,0 +1,32 @@
+version: '3.1'
+
+services:
+  frontend-flask:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    container_name: frontend-flask
+    # flask requires SIGINT to stop gracefully
+    # (default stop signal from Compose is SIGTERM)
+    stop_signal: SIGINT
+    environment:
+      FLASK_DEBUG: False
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_APP: main.py
+      FLASK_RUN_PORT: 5000
+      SECRET_KEY: b'\x03%\x98\xa5\xe6`JP\xc2\xa9~\xf1\xc9\xde\xd0\xf3'
+      MONGODB_DATABASE: frontend
+      MONGODB_USERNAME: 
+      MONGODB_PASSWORD: 
+      MONGODB_HOSTNAME: frontend-mongodb
+      MONGODB_PORT: 27017
+    ports:
+      - "5000:5000"
+    volumes:
+      - ".:/fronend"
+    depends_on:
+      -  frontend-mongodb
+
+  frontend-mongodb:
+    image: mongo
+    container_name: frontend-mongodb
