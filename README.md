@@ -32,11 +32,13 @@ python == 3.10
 
 ## Frontend
 
-### How to 
-1. docker compose build
-2. docker compose up -d
-3. Access webserver at http://localhost:5000
-
+### (Update 04/18/23) How to install frontend using docker
+```
+$ cd frontend
+$ docker compose build
+$ docker compose up -d
+```
+- Access webserver at http://localhost:5000
 
 
 
