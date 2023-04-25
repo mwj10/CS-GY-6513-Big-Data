@@ -1,0 +1,3 @@
+.env
+extract/venv
+sentiment-analysis/venv
