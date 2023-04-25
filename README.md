@@ -11,6 +11,15 @@ https://docs.docker.com/engine/install/
 - `docker pull mongo`
 - `docker run -d -p 27017-27019:27017-27019 --name mango mongo`
 
+## LSTM
+### APIs:
+- Training all models: `/train`
+- Training specific model: `/train/<string:q_ticker>`
+- Data View: `/lstm_data_view/<string:q_ticker>`
+- inference: `/inference/<string:q_ticker>` OR `/inference/<string:q_ticker>?days=5`
+
+`days` is an optional query parameter referring to the number of inference days requested
+
 
 ## Sentiment Analysis
 
