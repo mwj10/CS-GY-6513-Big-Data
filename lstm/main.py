@@ -77,6 +77,6 @@ def train_models(q_ticker=None):
     return json.dumps({"status":"DONE"})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=8003)
 
     
