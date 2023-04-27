@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  news-store-mongo:
+    image: mongo:latest
+    ports:
+      - 27019:27017
+
+  news-sentiment-mong:
+    image: mongo:latest
+    ports:
+      - 27018:27017
+
+  lstm-postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=lstm
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5433:5432
+#https://geshan.com.np/blog/2021/12/docker-postgres/

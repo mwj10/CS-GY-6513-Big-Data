@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  news-store-mongo:
+    image: mongo:latest
+    ports:
+      - 27019:27017
+  
+  news-sentiment-mong:
+    image: mongo:latest
+    ports:
+      - 27018:27017
+
+
+    
+    
