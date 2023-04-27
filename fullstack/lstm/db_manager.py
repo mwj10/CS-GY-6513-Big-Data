@@ -10,7 +10,7 @@ def connectToDB():
     global conn
     global cur
 
-    cred = {"host": "localhost", "port": "5433", "database": "lstm",
+    cred = {"host": "lstm-postgres", "port": "5433", "database": "lstm",
             "user": "postgres", "password": "postgres"}
     print('Connecting to the PostgreSQL database...')
     conn = psycopg2.connect(

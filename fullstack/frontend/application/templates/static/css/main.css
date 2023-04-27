@@ -1,0 +1,270 @@
+* {
+    box-sizing: border-box;
+}
+
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    height: 100%;
+    position: relative;
+    margin:0;
+}
+
+header {
+    text-align: center;
+}
+
+li {
+    display: inline;
+    padding: 5px;
+}
+
+a {
+    text-decoration: none;
+    color: blue;
+}
+
+a:hover { color : red;}
+
+hr {
+    width: 100%;
+    height:2px;
+    margin: 0 0 10px 0;
+    padding: 0;
+    background-color: darkblue;
+    border: 0 none;
+}
+.search-box {
+    height:40px;
+    
+}
+.search-box label{
+    margin-bottom: 0px;
+    line-height: 2.5em;
+}
+
+.search-box select{
+    border: 0px;
+    margin-left:5px;
+    background-color: aliceblue;
+}
+
+.search-box input[type=text], .search-box input[type=submit]{
+    padding: 0 10px !important;
+    margin: 0 !important;
+    width:80px !important;
+    
+}
+.search-box input[type=text]{
+    border: 1px solid aliceblue;
+    width:180px !important;
+}
+
+input[type=text], textarea, input[type=password], input[type=email] {
+    width: 100%;
+    padding: 10px;
+    /* margin: 5px 0 22px 0; */
+    margin: 5px 0;
+    display: inline-block;
+    border: none;
+    background: #f1f1f1;
+}
+
+input[type=text]:focus, textarea:focus, input[type=password]:focus, input[type=email]:focus {
+    background-color: #ddd;
+    outline: none;
+}
+.container {
+    padding-bottom: 40px;
+}
+.top-container {
+    background: #1d3557;
+    padding:5px;
+    /* border-bottom:2px solid #0f0f0f; */
+}
+.bottom-container {
+    /* background: #a8dadc; */
+    padding:5px;
+    /* border-top:2px solid #3d3d3d; */
+    position: fixed;
+    bottom:0;
+}
+
+.container-term {
+    width:80%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+footer {
+    text-align: center;
+    height: 30px;
+    color: #000;
+    padding: 5px;
+    /* margin: 10px 0; */
+    bottom: 0px;
+}
+
+/* .btn-submit, input[type=submit] {
+    background-color: cornflowerblue;
+    color: white;
+    padding: 15px;
+    margin: 10px 0 0 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    opacity: 0.9;
+}
+.btn-submit:hover, input[type=submit]:hover {
+    opacity: 1;
+} */
+
+.error-message {
+    color: red;
+}
+
+.welcome {
+    float: right;
+    position: absolute;
+    font-size: 25px;
+    right: 2em;
+    top: 2em;
+}
+
+/* checkmark */
+/* Customize the label (the container) */
+.container-mark {
+    font-size: 1.05em;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.container-mark input {
+    position: absolute;
+    cursor: pointer;
+    height: 25px;
+    width: 25px;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container-mark input:checked{
+    background-color: #2196F3;  
+}
+
+.container-mark label {
+margin-left: 30px;
+    cursor: pointer;
+}
+
+.dashboard iframe { 
+    display: block; 
+    width:100%; 
+    height:100vh;
+    padding-bottom: 50px;
+    border: 0;
+    position: absolute;
+    left: 0;
+    bottom: 50;
+}
+
+table {
+    margin-top:10px;
+}
+
+a svg {
+    margin: 0 5px 4px 0;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: lightgray;
+    opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+color: lightgray;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+color: lightgray;
+}
+
+.required:after {
+    content: " *";
+    color: red;
+}
+
+
+.icon-list {
+    padding-left: 0;
+    list-style: none;
+  }
+  .icon-list li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: .25rem;
+  }
+  .icon-list li::before {
+    display: block;
+    flex-shrink: 0;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: .5rem;
+    content: "";
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23212529' viewBox='0 0 16 16'%3E%3Cpath d='M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z'/%3E%3C/svg%3E") no-repeat center center / 100% auto;
+  }
+
+
+  div#loading {
+    width: 200px;
+    height: 200px;
+    display: none;
+    background: url('/images/magnify-1s-200px.gif') no-repeat;
+    cursor: wait;
+    }
+
+.small {
+    font-size: .825em;
+}
+.xsmall {
+    font-size: .775em;
+}
+/* .stock-table {
+    min-width: 270px;
+} */
+.stock-table tbody tr{
+    height: 40px;
+    vertical-align: middle;
+}
+.stock-table tbody tr td{
+    min-width: 60px;
+    padding: 0px;
+}
+.stock-table tbody tr th{
+    min-width: 60px;
+    text-align: right;
+    padding: 0px;
+}
+
+.stock-nav a:link{
+    color: #000;
+}
+
+.stock-nav a:visited{
+    color: #000;
+}
+
+.stock-nav a:hover{
+    color: blue;
+}
+
+.stock-nav a:active{
+    color: blue;
+}

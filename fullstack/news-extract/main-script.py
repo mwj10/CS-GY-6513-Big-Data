@@ -6,7 +6,7 @@ from pymongo import MongoClient
 def main():
     # lets start with the extractionDB
     # or MongoClient("localhost:27")
-    client = MongoClient('mongodb://localhost:27019')
+    client = MongoClient('news-extract-mongo', 27019)
     db = client.test_db
     # db.list_collection_names()  # this should be empty
 
@@ -16,7 +16,7 @@ def main():
 
     # lets now repeat for sentimentDB
     # or MongoClient("localhost:27")
-    client = MongoClient('mongodb://localhost:27018')
+    client = MongoClient('news-sentiment-analysis-mongo', 27018)
     db = client.test_db
     # db.list_collection_names()  # this should be empty
 
@@ -33,12 +33,12 @@ def main():
     ]
 
     for endpt in endpoints:
-        url = f"http://localhost:8001"+endpt
+        url = f"http://news-extract-flask:8001"+endpt
         response = requests.get(url)
         print(f"{endpt} - {response.json()}")
 
     # make sure the sentiment-analysis flask app is listening on port 8002
-    url = 'http://localhost:8002/transform'
+    url = 'http://news-sentiment-analysis-flask:8002/transform'
 
     response = requests.get(url)
 
@@ -46,7 +46,7 @@ def main():
 
     # call endpoint to run sentiment
     # make sure the extraction flask app is listening on port 8001
-    url = 'http://localhost:8002/sentiment'
+    url = 'http://news-sentiment-analysis-flask:8002/sentiment'
 
     response = requests.get(url)
 
@@ -54,7 +54,8 @@ def main():
 
     # Test access data
     # connect to sentiment db
-    client = MongoClient('mongodb://localhost:27018')
+    
+    client = MongoClient('news-sentiment-analysis-mongo', 27018)
     db = client.test_db
     collection = db.test
     for doc in collection.find():

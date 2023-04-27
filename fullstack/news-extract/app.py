@@ -3,6 +3,7 @@ import requests
 from collections import defaultdict
 from util import *
 from pymongo import MongoClient
+import json
 import datetime
 import http.client
 import urllib.parse
@@ -13,11 +14,11 @@ from dotenv import load_dotenv
 # Load your API key from an environment variable or secret management service
 load_dotenv()
 
-secretNYT = os.environ.get('NYT_KEY')
-secretMediaStack = os.environ.get('MEDIA_STACK_KEY')
+secretNYT = os.getenv('NYT_KEY')
+secretMediaStack = os.getenv('MEDIA_STACK_KEY')
 
 KEY = secretNYT
-client = MongoClient('mongodb://localhost:27019')
+client = MongoClient('news-extract-mongo', 27019)
 db = client.test_db
 collection = db.test
 
@@ -174,6 +175,21 @@ def extract_yfinance():
             'message': 'Error pushing data.'
         }
 
+@app.route("/getnews")
+@app.route("/getnews/<string:q_ticker>")
+def getnews(q_ticker=None):
+    # if  != None:
+    client = MongoClient('news-sentiment-analysis-mongo', 27018) #connect to sentiment db
+    db = client.test_db
+    collection = db.test
+    cursor = collection.find()
+    json_result = []
+    for row in cursor:
+        json_result.append({'date': row['date'], 'data': row['data']})
+    print(json_result)
+    
+    return json.dumps(json_result)
+
 
 @app.route("/test")
 def test():
@@ -181,6 +197,69 @@ def test():
         'test': 'test'
     }
 
+@app.cli.command('db_seed')
+@app.route("/seed")
+def seed():
+    # lets start with the extractionDB
+    # or MongoClient("localhost:27")
+    client = MongoClient('news-extract-mongo', 27019)
+    db = client.test_db
+    # db.list_collection_names()  # this should be empty
+
+    # drop collection if previous cell wasn't empty
+    for collection in db.list_collection_names():
+        db[collection].drop()
+
+    # lets now repeat for sentimentDB
+    # or MongoClient("localhost:27")
+    client = MongoClient('news-sentiment-analysis-mongo', 27018)
+    db = client.test_db
+    # db.list_collection_names()  # this should be empty
+
+    # drop collection if previous cell wasn't empty
+    for collection in db.list_collection_names():
+        db[collection].drop()
+    # db.list_collection_names()  # this should be empty
+
+    endpoints = [
+        '/',
+        '/nyt',
+        '/mediastack-gen',
+        '/yfinance'
+    ]
+
+    for endpt in endpoints:
+        url = f"http://news-extract-flask:8001"+endpt
+        response = requests.get(url)
+        print(f"{endpt} - {response.json()}")
+
+    # make sure the sentiment-analysis flask app is listening on port 8002
+    url = 'http://news-sentiment-analysis-flask:8002/transform'
+
+    response = requests.get(url)
+
+    print(response.json())
+
+    # call endpoint to run sentiment
+    # make sure the extraction flask app is listening on port 8001
+    url = 'http://news-sentiment-analysis-flask:8002/sentiment'
+
+    response = requests.get(url)
+
+    print(response.json())
+
+    # Test access data
+    # connect to sentiment db
+    
+    client = MongoClient('news-sentiment-analysis-mongo', 27018)
+    db = client.test_db
+    collection = db.test
+    for doc in collection.find():
+        print(doc)
+
+    return {
+        'message': 'News database has been seeded'
+    }
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8001, debug=True)
+    app.run()

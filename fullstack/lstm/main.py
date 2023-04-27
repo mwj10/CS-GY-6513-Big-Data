@@ -61,6 +61,7 @@ def inference(q_ticker):
     return json.dumps(json_results)
 
 
+@app.cli.command("db_seed")
 @app.route("/seed")
 def seed():
     # Download data
@@ -69,7 +70,19 @@ def seed():
     # print(ticker_info.dow30)
     dl.download(ticker_info.dow30, '2013-01-01', today, force=True)
     # dl.download(ticker_info.dow30, '1900-01-01', today, force=True)
-    return "OK"
+    # train on all tickers
+    conn = db.connectToDB()
+
+    tickers = db.getTickers(conn)
+    print(tickers)
+
+    for ticker in tickers:
+        print(ticker)
+        lstm.train(ticker)
+
+    return {
+        'message': 'News database has been seeded'
+    }
 
 
 @app.route("/train")
@@ -94,5 +107,11 @@ def train_models(q_ticker=None):
     return json.dumps({"status": "DONE"})
 
 
+
+@app.route("/")
+def index():
+    return "Index"
+
+
 if __name__ == '__main__':
-    app.run(ip="0.0.0.0", debug=True, port=8003)
+    app.run()

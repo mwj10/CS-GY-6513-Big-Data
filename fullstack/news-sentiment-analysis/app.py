@@ -14,8 +14,8 @@ model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
 
 @app.route("/transform")
 def transform_data():
-
-    client = MongoClient('mongodb://localhost:27017') #connect to extraction db
+    client = MongoClient('news-extract-mongo', 27019)
+    # client = MongoClient('mongodb://localhost:27017') #connect to extraction db
     db = client.test_db
     collection = db.test
     #load data from yesterday
@@ -56,7 +56,8 @@ def transform_data():
 
 @app.route("/sentiment")
 def hello_world():
-    client = MongoClient('mongodb://localhost:27017') #connect to extraction db
+    client = MongoClient('news-extract-mongo', 27019)
+    # client = MongoClient('mongodb://localhost:27017') #connect to extraction db
     db = client.test_db
     collection = db.transformedData
     yesterday = ((datetime.datetime.today()) - datetime.timedelta(days=1)).strftime('%m-%d-%Y')
@@ -96,7 +97,8 @@ def hello_world():
         data[ transformed_data[i]['date'] ][ transformed_data[i]['search_term'] ]['news'].append(sentiment_data)
 
     #connect and send data to sentiment store db
-    client2 = MongoClient('mongodb://localhost:27018') #connect to extraction db
+    client2 = MongoClient('news-sentiment-analysis-mongo', 27018)
+    # client2 = MongoClient('mongodb://localhost:27018') 
     db2 = client2.test_db
     collection2 = db2.test
     try:
@@ -112,7 +114,7 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8002,debug=True)
+    app.run()
 
 
 """

@@ -1,22 +1,156 @@
 version: "3"
 
 services:
-  news-store-mongo:
-    image: mongo:latest
+  frontend-flask:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    container_name: frontend-flask
+    # flask requires SIGINT to stop gracefully
+    # (default stop signal from Compose is SIGTERM)
+    stop_signal: SIGINT
+    environment:
+      FLASK_DEBUG: True
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_APP: main.py
+      FLASK_RUN_PORT: 8004
+      SECRET_KEY: b'\x03%\x98\xa5\xe6`JP\xc2\xa9~\xf1\xc9\xde\xd0\xf3'
+      MONGODB_DATABASE: frontend
+      MONGODB_USERNAME: 
+      MONGODB_PASSWORD: 
+      MONGODB_HOSTNAME: frontend-mongo
+      MONGODB_PORT: 27020
+      NEWS_EXTRACT_SERVER: news-extract-flask:8001
+      LSTM_SERVER: lstm-flask:8003
     ports:
-      - 27019:27017
+      - "8004:8004"
+    volumes:
+      - "./frontend:/frontend"
+    depends_on:
+      -  frontend-mongo
+    networks:
+      - big-data
 
-  news-sentiment-mong:
-    image: mongo:latest
+  news-extract-flask:
+    build:
+      context: news-extract
+      dockerfile: Dockerfile
+    container_name: news-extract-flask
+    stop_signal: SIGINT
+    environment:
+      FLASK_DEBUG: True
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_APP: app.py
+      FLASK_RUN_PORT: 8001
+      NYT_KEY: pHmcYlXEPuMQUPmacicgHzc08GlgMas7
+      MEDIA_STACK_KEY: 4884a94b3dfd0bdcf40917232ec225da
     ports:
-      - 27018:27017
+      - "8001:8001"
+    volumes:
+      - "./news-extract:/news-extract"
+    depends_on:
+      - news-extract-mongo
+      - news-sentiment-analysis-mongo
+      - news-sentiment-analysis-flask
+    networks:
+      - big-data
+
+
+  news-sentiment-analysis-flask:
+    build:
+      context: news-sentiment-analysis
+      dockerfile: Dockerfile
+    container_name: news-sentiment-analysis-flask
+    stop_signal: SIGINT
+    environment:
+      FLASK_DEBUG: True
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_APP: app.py
+      FLASK_RUN_PORT: 8002
+    ports:
+      - "8002:8002"
+    volumes:
+      - "./news-sentiment-analysis:/news-sentiment-analysis"
+    depends_on:
+      - news-sentiment-analysis-mongo
+      - news-extract-mongo
+    networks:
+      - big-data
+
+
+  lstm-flask:
+    build:
+      context: lstm
+      dockerfile: Dockerfile
+    container_name: lstm-flask
+    stop_signal: SIGINT
+    environment:
+      FLASK_DEBUG: True
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_APP: main.py
+      FLASK_RUN_PORT: 8003
+    ports:
+      - "8003:8003"
+    volumes:
+      - "./lstm:/lstm"
+    depends_on:
+      - lstm-postgres
+    networks:
+      - big-data
+
+
+  frontend-mongo:
+    image: mongo
+    container_name: frontend-mongo
+    command: mongod --port 27020
+    expose:
+      - 27020
+    ports:
+      - 27020:27020
+    networks:
+      - big-data
+
+
+  news-extract-mongo:
+    image: mongo:latest
+    container_name:  news-extract-mongo
+    command: mongod --port 27019
+    expose:
+      - 27019
+    ports:
+      - 27019:27019
+    networks:
+      - big-data
+
+
+  news-sentiment-analysis-mongo:
+    image: mongo:latest
+    container_name:  news-sentiment-analysis-mongo
+    command: mongod --port 27018
+    expose:
+      - 27018
+    ports:
+      - 27018:27018
+    networks:
+      - big-data
+
 
   lstm-postgres:
     image: postgres:latest
+    container_name:  lstm-postgres
     environment:
       - POSTGRES_DB=lstm
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    expose:
+      - 5433
     ports:
-      - 5433:5432
+      - 5433:5433
+    command: -p 5433
+    networks:
+      - big-data
+
+networks:
+  big-data:
+    driver: bridge
 #https://geshan.com.np/blog/2021/12/docker-postgres/
