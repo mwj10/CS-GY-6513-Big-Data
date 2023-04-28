@@ -193,19 +193,59 @@ def extract_yfinance():
         }
 
 @app.route("/getnews")
+@app.route("/getnews/")
 @app.route("/getnews/<string:q_ticker>")
 def getnews(q_ticker=None):
-    # if  != None:
+
+    today = datetime.datetime.today()
+    # Retreive 4-days old data
+    dates = [(today-datetime.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(5)]
+
     client = MongoClient('news-sentiment-analysis-mongo', 27018) #connect to sentiment db
     db = client.test_db
     collection = db.test
-    cursor = collection.find()
-    json_result = []
+    cursor = collection.find({'date': { '$in': dates }}).sort("date", -1)
+    json_collection_arr = []
+    json_collection_dict = {}
     for row in cursor:
-        json_result.append({'date': row['date'], 'data': row['data']})
-    print(json_result)
+        print(row)
+        for key, val in row['data'].items():
+            # json_result[key] = val
+            # print(key)
+            for k, v in val.items():
+                
+                # for k, v in item.items():
+                #     print(v)
+                for item in v['news']:
+                    json_collection_dict["date"] = key
+                    json_collection_dict["stock"] = k
+                    for kk, vv in item.items():
+                        
+                        json_collection_dict[kk] = vv
+                    # print(item)
+                
+                    json_collection_arr.append(json_collection_dict)
+                    json_collection_dict = {}
+            # print(val)
+        # 
+    # print(json_collection_arr)
+
+    json_result_arr = []
+    if q_ticker is not None:
+        if str(q_ticker).lower() == 'all':
+            json_result_arr = json_collection_arr
+        else:
+            for col in json_collection_arr:
+                if str(q_ticker).lower() == str(col['symbol']).lower():
+                    json_result_arr.append(col)
+    else:
+        for col in json_collection_arr:
+            if col['symbol'] == "":
+                json_result_arr.append(col)
+    # for item in json_collection_arr:
+    #     print(item)
     
-    return json.dumps(json_result[1])
+    return json_result_arr
 
 
 @app.route("/test")

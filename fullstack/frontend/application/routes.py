@@ -71,7 +71,7 @@ def index(search=""):
     news = {}
     for stock in stocks:
         info[stock] = tickers.tickers[stock].info
-        print(f"info : {info[stock]}")
+        # print(f"info : {info[stock]}")
         new = tickers.tickers[stock].news
         # print(f"news:{new}")
         news[stock] = new[random.randint(0, math.floor((len(new)-1)/2))]
@@ -96,7 +96,7 @@ def index(search=""):
         search = request.form.get("search")
     if search:
         regex = re.compile(fr".*{search}.*", re.IGNORECASE)
-        print(regex)
+        # print(regex)
         quotes = list(Usa_stock.objects.aggregate([
             {'$sort': {'short': 1}},
             {'$match': {'short': regex}},
@@ -127,7 +127,7 @@ def human_format(num):
 @app.route("/quote/<name>/<period>", methods=["GET"])
 def quote(name, period="6mo"):
     m = {'K': 3, 'M': 6, 'B': 9, 'T': 12}
-    print(period)
+    # print(period)
     periods = {"1d": "1D",
                "5d": "5D",
                "1mo": "1M",
@@ -192,8 +192,44 @@ def quote(name, period="6mo"):
         tick['earningsTimestampEnd'])
     tick['earningsTimestampEnd'] = earningsTimestampEnd.strftime("%b %d, %Y")
 
-    # print(tick.get('beta'))
-    return render_template("quote.html", title=f"Quote - {tick['longName']} ({name})", name=name, tick=tick, color=color, intervals=intervals, periods=periods, period=period)
+
+    news_setiment_stock = getnews(name)
+    news_setiment_blank = getnews("", 3)
+    return render_template("quote.html", title=f"Quote - {tick['longName']} ({name})", name=name, tick=tick, color=color, intervals=intervals, periods=periods, period=period, news_setiment_stock=news_setiment_stock, news_setiment_blank=news_setiment_blank)
+
+def getnews(name, max=None):
+    news_extract_server = os.getenv("NEWS_EXTRACT_SERVER")
+    news_extract_request = requests.get(f"http://{news_extract_server}/getnews/{name}")
+    news_extract_string = json.loads(news_extract_request.text)
+    result_string = None
+    result_array = []
+    result_dict = {}
+    pick_list = None
+    if max is not None:
+        pick_list = [random.randint(0, len(news_extract_string)) for i in range(max)]
+    # print(f"pick list {pick_list}")
+    if news_extract_string is not None:
+        for c, news in enumerate(news_extract_string):
+            if pick_list is not None:
+                if c not in pick_list:
+                    continue
+            result_dict = news_extract_string[c]
+            ag = ago(datetime.datetime.strptime(news['date'], '%m-%d-%Y'))
+            result_dict['date'] = ag
+            likely_key = ""
+            likely_val = -1
+            for key, val in news['sentiment'].items():
+                
+                if float(val) > likely_val:
+                    likely_key = key
+                    likely_val = val
+                result_dict['sentiment'][key] = f"{val:.2f}%"
+            result_dict['likely'] = likely_key
+            result_array.append(result_dict)
+            result_dict = {}
+        result_string = result_array
+        # print(result_string)
+    return result_string
 
 
 @app.route('/callback/<endpoint>')
@@ -211,8 +247,8 @@ def cb(endpoint):
 # Return the JSON data for the Plotly graph
 def gm(stock, period, interval, color):
     st = yf.Ticker(stock)
-    print(period)
-    print(interval)
+    # print(period)
+    # print(interval)
 
     # Retrieve API
     # Getting inferencial data

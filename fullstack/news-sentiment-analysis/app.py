@@ -113,6 +113,7 @@ def hello_world():
             positive = predictions[:, 0].tolist()
             negative = predictions[:, 1].tolist()
             neutral = predictions[:, 2].tolist()
+            
             sentiment_data = {
                 'symbol':transformed_data[i]['symbol'],
                 'headline':transformed_data[i]['news'],

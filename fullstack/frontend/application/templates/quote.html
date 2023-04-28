@@ -55,112 +55,189 @@ Index
 </div>
 <div class="row px-1">
     <!-- <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 text-center"> -->
-        <div class="container py-2">
-            <div class="row align-items-stretch my-2">
-              <div class="col-12 border-top border-{{color}} border-5 mb-3 order-lg-1">
-                <h5 class="fw-bold mt-2 mb-0">{{tick['longName']}} ({{name}})</h5>
-                <p class="xsmall text-secondary mb-2">{{tick['fullExchangeName']}}	{{tick['quoteSourceName']}}	Currency in	{{tick['financialCurrency']}}</p>
-                <div class="d-flex align-items-bottom mt-0 mb-0"><h1 class="fw-bold mt-auto mb-0 me-2">{{tick['regularMarketPrice']}}</h1><h4 class="fw-bold mt-auto mb-1 me-2 text-{{color}}">{{tick['regularMarketChange']}}</h4><h4 class="fw-bold mt-auto mb-1 me-2 text-{{color}}">({{tick['regularMarketChangePercent']}}%)</h4></div>
-                {% if tick['marketState'] == "REGULAR" %}
-                <p class="xsmall text-secondary my-0">As of	{{tick['regularMarketTime']}}.	Market	Open.</p>
+      <div class="container pt-2 pb-0">
+        <div class="row align-items-stretch mt-2 mb-0">
+          <div class="col-12 border-top border-{{color}} border-5 mb-3 order-lg-1">
+            <h5 class="fw-bold mt-2 mb-0">{{tick['longName']}} ({{name}})</h5>
+            <p class="xsmall text-secondary mb-2">{{tick['fullExchangeName']}}	{{tick['quoteSourceName']}}	Currency in	{{tick['financialCurrency']}}</p>
+            <div class="d-flex align-items-bottom mt-0 mb-0"><h1 class="fw-bold mt-auto mb-0 me-2">{{tick['regularMarketPrice']}}</h1><h4 class="fw-bold mt-auto mb-1 me-2 text-{{color}}">{{tick['regularMarketChange']}}</h4><h4 class="fw-bold mt-auto mb-1 me-2 text-{{color}}">({{tick['regularMarketChangePercent']}}%)</h4></div>
+            {% if tick['marketState'] == "REGULAR" %}
+            <p class="xsmall text-secondary my-0">As of	{{tick['regularMarketTime']}}.	Market	Open.</p>
+            {% else %}
+            <p class="xsmall text-secondary my-0">At close: {{tick['regularMarketTime']}}</p>
+            {% endif %}
+          </div>
+
+          <div class="col-lg-6 order-lg-3">
+            <div class="col-12">
+              <div class="d-flex flex-wrap stock-nav">
+                {% for key, val in periods.items() %}
+                {% if period == key %}
+                  <a class="xsmall ms-2 mt-2 mb-0 fw-bolder text-primary" href="{{ url_for('quote', name=name, period=key) }}">{{ val }}</a>
                 {% else %}
-                <p class="xsmall text-secondary my-0">At close: {{tick['regularMarketTime']}}</p>
+                  <a class="xsmall ms-2 mt-2 mb-0 fw-bolder text-dark" href="{{ url_for('quote', name=name, period=key) }}">{{ val }}</a>
                 {% endif %}
+                {% endfor %}
               </div>
-
-              <div class="col-lg-6 order-lg-3">
-                <div class="col-12">
-                  <div class="d-flex flex-wrap stock-nav">
-                    {% for key, val in periods.items() %}
-                    {% if period == key %}
-                      <a class="xsmall ms-2 mt-2 mb-0 fw-bolder text-primary" href="{{ url_for('quote', name=name, period=key) }}">{{ val }}</a>
-                    {% else %}
-                      <a class="xsmall ms-2 mt-2 mb-0 fw-bolder text-dark" href="{{ url_for('quote', name=name, period=key) }}">{{ val }}</a>
-                    {% endif %}
-                    {% endfor %}
-                  </div>
-                  <div id="chart" class="chart" style="height: 250px; width:100%;"></div>
-                </div>
-              </div>
-
-              <div class="col-lg-6 mb-5 d-flex flex-wrap small order-lg-2">
-                <!-- <div class="mb-4" ><img src="https://covers.openlibrary.org/a/olid/{{ key }}-M.jpg" alt=""></div> -->
-                <div class="col-6">
-                  <table class="table stock-table me-2">
-                    <tbody>
-                      <tr>
-                        <td scope="row">Open</td>
-                        <th>{{tick['regularMarketOpen']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Bid</td>
-                        <th>{{tick['bid']}} x {{tick['bidSize']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Ask</td>
-                        <th>{{tick['ask']}} x {{tick['askSize']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Day's Range</td>
-                        <th>{{tick['regularMarketDayRange']}}</td>
-                      </tr>
-                      <tr>
-                        <td scope="row">52 Week Range</td>
-                        <th>{{tick['fiftyTwoWeekRange']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Volume</td>
-                        <th>{{tick['regularMarketVolume']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Avg. Volumne</td>
-                        <th>{{tick['averageDailyVolume3Month']}}</th>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="col-6">
-                  <table class="table stock-table ms-2">
-                    <tbody>
-                      <tr>
-                        <td scope="row">Previous Close</td>
-                        <th>{{tick['regularMarketPreviousClose']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Market Cap</td>
-                        <th>{{tick['marketCap']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">PE Ratio (TTM)</td>
-                        <th>{{tick['trailingPE']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">EPS (TTM)</td>
-                        <th>{{tick['epsTrailingTwelveMonths']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Earnings Date</td>
-                        <th>{{tick['earningsTimestampStart']}} - {{tick['earningsTimestampEnd']}}</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Forward Dividend & Yield</td>
-                        <th>{{tick['trailingAnnualDividendRate']}} ({{tick['trailingAnnualDividendYield']}}%)</th>
-                      </tr>
-                      <tr>
-                        <td scope="row">Ex-Dividend Date</td>
-                        <th>{{tick['dividendDate']}}</th>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <!-- font-weight -->
-                <!-- <h1 class="fw-bold">Some name</h1>  -->
-                <!-- font-size -->
-                <!-- <p class="fs-6">Some Quote</p> -->
-              </div>
-
+              <div id="chart" class="chart" style="height: 250px; width:100%;"></div>
             </div>
           </div>
+
+          <div class="col-lg-6 mb-0 d-flex flex-wrap small order-lg-2">
+            <!-- <div class="mb-4" ><img src="https://covers.openlibrary.org/a/olid/{{ key }}-M.jpg" alt=""></div> -->
+            <div class="col-6">
+              <table class="table stock-table me-2">
+                <tbody>
+                  <tr>
+                    <td scope="row">Open</td>
+                    <th>{{tick['regularMarketOpen']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Bid</td>
+                    <th>{{tick['bid']}} x {{tick['bidSize']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Ask</td>
+                    <th>{{tick['ask']}} x {{tick['askSize']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Day's Range</td>
+                    <th>{{tick['regularMarketDayRange']}}</td>
+                  </tr>
+                  <tr>
+                    <td scope="row">52 Week Range</td>
+                    <th>{{tick['fiftyTwoWeekRange']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Volume</td>
+                    <th>{{tick['regularMarketVolume']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Avg. Volumne</td>
+                    <th>{{tick['averageDailyVolume3Month']}}</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-6">
+              <table class="table stock-table ms-2">
+                <tbody>
+                  <tr>
+                    <td scope="row">Previous Close</td>
+                    <th>{{tick['regularMarketPreviousClose']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Market Cap</td>
+                    <th>{{tick['marketCap']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">PE Ratio (TTM)</td>
+                    <th>{{tick['trailingPE']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">EPS (TTM)</td>
+                    <th>{{tick['epsTrailingTwelveMonths']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Earnings Date</td>
+                    <th>{{tick['earningsTimestampStart']}} - {{tick['earningsTimestampEnd']}}</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Forward Dividend & Yield</td>
+                    <th>{{tick['trailingAnnualDividendRate']}} ({{tick['trailingAnnualDividendYield']}}%)</th>
+                  </tr>
+                  <tr>
+                    <td scope="row">Ex-Dividend Date</td>
+                    <th>{{tick['dividendDate']}}</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- font-weight -->
+            <!-- <h1 class="fw-bold">Some name</h1>  -->
+            <!-- font-size -->
+            <!-- <p class="fs-6">Some Quote</p> -->
+          </div>
+
+        </div>
+      </div>
+
+      <div class="container py-0">
+        <div class="row">
+          <h6 class="fw-bold mt-2 mb-0">Related News Outlook</h6>
+        </div>
+        <!-- Related to current stock-->
+        {% if news_setiment_stock %}
+        {% for news in news_setiment_stock %}
+        <div class="row align-items-stretch my-2">
+          <div class="order-2 order-md-1 col-lg-4 col-md-5 col-sm-12 d-flex flex-wrap mb-auto small text-center">
+              {% for key, val in news['sentiment'].items() %} 
+  
+                {%  if news["likely"] == key == "negative" %}
+                <div class="col p-2 m-1 border rounded text-dark bg-warning fw-bold">
+                {%  elif news["likely"] == key == "neutral" %}
+                <div class="col p-2 m-1 border rounded text-dark bg-info fw-bold">
+                {%  elif news["likely"]  == key == "positive" %}
+                <div class="col p-2 m-1 border rounded text-light bg-success fw-bold">
+                {% else %}
+                <div class="col p-2 m-1 border rounded">
+                {% endif %}
+                  <p class="m-0">{{key}}</p>
+                  <p class="m-0">{{val}}</p>
+                </div>
+              {% endfor %}
+          </div>
+          <div class="order-1 order-md-2 col pt-1 d-flex flex-column position-static">
+            <div class="mb-1 small text-body-secondary">{{news['source']}} - {{news['date']}}</div>
+            <div class="d-inline mb-2">
+              <p class="card-text">{{news['headline']}}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>There is no related news for this company in this period.</p>
+        {% endif %}
+      </div>
+
+      <div class="container pt-0 pb-4">
+        <div class="row">
+          <h6 class="fw-bold mt-2 mb-0">Market Outlook</h6>
+        </div>
+        <!-- Related to current stock-->
+        {% if news_setiment_blank %}
+        {% for news in news_setiment_blank %}
+        <div class="row align-items-stretch my-2">
+          <div class="order-2 order-md-1 col-lg-4 col-md-5 col-sm-12 mb-auto d-flex flex-wrap small text-center">
+              {% for key, val in news['sentiment'].items() %} 
+  
+                {%  if news["likely"] == key == "negative" %}
+                <div class="col p-2 m-1 border rounded text-dark bg-warning fw-bold">
+                {%  elif news["likely"] == key == "neutral" %}
+                <div class="col p-2 m-1 border rounded text-dark bg-info fw-bold">
+                {%  elif news["likely"]  == key == "positive" %}
+                <div class="col p-2 m-1 border rounded text-light bg-success fw-bold">
+                {% else %}
+                <div class="col p-2 m-1 border rounded">
+                {% endif %}
+                  <p class="m-0">{{key}}</p>
+                  <p class="m-0">{{val}}</p>
+                </div>
+              {% endfor %}
+          </div>
+          <div class="order-1 order-md-2 col pt-1 d-flex flex-column position-static">
+            <div class="mb-1 small text-body-secondary">{{news['source']}} - {{news['date']}}</div>
+            <div class="d-inline mb-2">
+              <p class="card-text">{{news['headline']}}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>There is no market news in this period.</p>
+        {% endif %}
+      </div>
+
     </div>
 
 </div>

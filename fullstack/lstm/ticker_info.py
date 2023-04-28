@@ -32,5 +32,5 @@ class DOW30(Enum):
     WBA = 'WBA'
     WMT = 'WMT'
 
-dow30 = ['AAPL','AMGN','AXP','BP','CAT','CRM','CSCO','CVX','DIS','DOW','GS','HD','HON','IBM',
+dow30 = ['AAPL','AMGN','AXP','BA','CAT','CRM','CSCO','CVX','DIS','DOW','GS','HD','HON','IBM',
     'INTC','JNJ','JPM','KO','MCD','MMM','MRK','MSFT','NKE','PG','TRV','UNH','V','VZ','WBA','WMT']

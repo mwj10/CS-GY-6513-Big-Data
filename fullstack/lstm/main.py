@@ -109,8 +109,9 @@ def train_models(q_ticker=None):
 
 
 @app.route("/")
+@app.route("/index")
 def index():
-    return "Index"
+    return {"message":"LSTM service is running."}
 
 
 if __name__ == '__main__':
