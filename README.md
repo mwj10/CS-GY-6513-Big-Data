@@ -1,15 +1,19 @@
 # Group 5 - Big Data Project Spring '23
 
 ## Contents
+- [Prerequisites](#prerequisites)
 - [System Requirements](#system-requirements)
     - [Minimum](#minimum)
     - [Recommeded](#recommeded)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
+- [How To Use](#how-to-use)
     - [Running a Docker](#running-a-docker)
     - [Testing the Docker](#testing-the-docker)
     - [Seeding Databases](#seeding-databases)
+    - [Stopping the Docker](#running-a-docker)
 - [Test Run](#test-run)
+
+## Prerequisites
+- [Docker](https://docs.docker.com/engine/install/)
 
 ## System Requirements
 ### Minimum
@@ -20,17 +24,15 @@
 - 60GB docker virtual disk space
 - 12GB docker memory
 
-## Prerequisites
-- [Docker](https://docs.docker.com/engine/install/)
-
-## Installation
+## How To Use
 ### Running a Docker
-- Start a docker in a background using `-d`
-- **Caution**: the follow command needs `10 minutes` to run.
+- Use the following command`*` to start a docker.
+- **Caution**: The first time you run the following command. It needs `10 minutes` to run.
 ```
 $docker compose up -d
 ```
-You will see a bunch of install messages. Wait until you see the following statement saying containers are started. 
+- *`-d` means we want to launch the docker in a background.
+- You will see a bunch of install messages. Wait until you see the following statement saying containers are started. 
 ```
 [+] Running 8/8
  - Container lstm-postgres                  Started  1.2s
@@ -42,7 +44,7 @@ You will see a bunch of install messages. Wait until you see the following state
  - Container frontend-flask                 Started  1.5s
  - Container news-extract-flask             Started  2.7s
 ```
-After the first start, you can also use the following command to check if all of the eight contianers are still running at any time.
+- After `docker compose up -d` was completed, you can use the following command to check if all of the eight containers are still running.
 ```
 docker ps
 ```
@@ -65,17 +67,33 @@ docker ps
 >![landing-page](assets/landing_page.jpg)
 
 ### Seeding Databases
-**Caution**: make sure that all containers are running. 
-- Launch http://localhost:8001/seed, wait for a few seconds and you should see
+- **Caution**: make sure that all containers are running. 
+- Launch http://localhost:8001/seed, wait for a few seconds and you should see:
 ```
 "message": "News database has been seeded"
 ```
-**Caution**: the following command needs **20 minutes** to complete
-- Launch http://localhost:8003/seed, wait for **20 minutes** and you should see
+- **Caution**: the following command needs **20 minutes** to complete.
+- Launch http://localhost:8003/seed, wait for **20 minutes** and you should see:
 ```
 "message": "News database has been seeded"
 ```
-
+### Stopping the Docker
+- To stop the docker run:
+```
+docker compose down
+```
+- You should see:
+```
+[+] Stopping 8/8
+ - Container lstm-postgres                  Stopped  1.2s
+ - Container frontend-mongo                 Stopped  0.6s
+ - Container news-sentiment-analysis-mongo  Stopped  1.2s
+ - Container news-extract-mongo             Stopped  1.2s
+ - Container lstm-flask                     Stopped  1.7s
+ - Container news-sentiment-analysis-flask  Stopped  2.1s
+ - Container frontend-flask                 Stopped  1.5s
+ - Container news-extract-flask             Stopped  2.7s
+```
 ## Test Run
-- Simply to go http://localhost:8004 and navigate through the site
-- You can directly go to each quote by specify their symbol, e.g., http://localhost:8004/quote/AAPL (Currently, we only support DOW30)
+- Simply to go http://localhost:8004 and navigate through the site.
+- You can directly go to each quote by specify their symbol, e.g., http://localhost:8004/quote/AAPL (Currently, we only support DOW30).
