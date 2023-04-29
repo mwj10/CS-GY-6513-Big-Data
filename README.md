@@ -13,12 +13,12 @@
 
 ## System Requirements
 ### Minimum
-- 40GB Hard Drive space
-- 8GB Ram  
+- 40GB docker virtual disk space
+- 6GB docker memory
 
 ### Recommeded
-- 80GB Hard Drive space
-- 16GB Ram  
+- 60GB docker virtual disk space
+- 12GB docker memory
 
 ## Prerequisites
 - [Docker](https://docs.docker.com/engine/install/)
@@ -30,7 +30,7 @@
 ```
 $docker compose up -d
 ```
-You will see a bunch of installing messages. Wait until you see the following statement. 
+You will see a bunch of install messages. Wait until you see the following statement saying containers are started. 
 ```
 [+] Running 8/8
  - Container lstm-postgres                  Started  1.2s
@@ -42,7 +42,7 @@ You will see a bunch of installing messages. Wait until you see the following st
  - Container frontend-flask                 Started  1.5s
  - Container news-extract-flask             Started  2.7s
 ```
-You can also use the following command to check if all eight contianers are running.
+After the first start, you can also use the following command to check if all of the eight contianers are still running at any time.
 ```
 docker ps
 ```
