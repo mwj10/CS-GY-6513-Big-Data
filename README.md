@@ -42,7 +42,7 @@ You will see a bunch of installing messages. Wait until you see the following st
  - Container frontend-flask                 Started  1.5s
  - Container news-extract-flask             Started  2.7s
 ```
-You can use the following command to check if all eight contianers are running.
+You can also use the following command to check if all eight contianers are running.
 ```
 docker ps
 ```
@@ -62,16 +62,16 @@ docker ps
 "message": "LSTM service is running."
 ```
 - Go to http://localhost:8004, you should see
-![landing-page](assets/landing_page.jpg)
+>![landing-page](assets/landing_page.jpg)
 
 ### Seeding Databases
-Caution: make sure that all containers are running. 
+**Caution**: make sure that all containers are running. 
 - Launch http://localhost:8001/seed, wait for a few seconds and you should see
 ```
 "message": "News database has been seeded"
 ```
-Caution: the following command needs `20 minutes` to complete
-- Launch http://localhost:8003/seed, wait for 20 minutes and you should see
+**Caution**: the following command needs **20 minutes** to complete
+- Launch http://localhost:8003/seed, wait for **20 minutes** and you should see
 ```
 "message": "News database has been seeded"
 ```
