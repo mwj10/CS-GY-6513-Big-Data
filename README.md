@@ -26,12 +26,12 @@
 
 ## How To Use
 ### Running a Docker
-- Use the following command`*` to start a docker.
+- Use the following command*\** to start a docker.
 - **Caution**: The first time you run the following command. It needs `10 minutes` to run.
 ```
 $docker compose up -d
 ```
-- *`-d` means we want to launch the docker in a background.
+- *\**`-d` means we want to launch the docker in a background.
 - You will see a bunch of install messages. Wait until you see the following statement saying containers are started. 
 ```
 [+] Running 8/8
