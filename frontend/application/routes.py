@@ -198,6 +198,7 @@ def quote(name, period="6mo"):
     return render_template("quote.html", title=f"Quote - {tick['longName']} ({name})", name=name, tick=tick, color=color, intervals=intervals, periods=periods, period=period, news_setiment_stock=news_setiment_stock, news_setiment_blank=news_setiment_blank)
 
 def getnews(name, max=None):
+    
     news_extract_server = os.getenv("NEWS_EXTRACT_SERVER")
     news_extract_request = requests.get(f"http://{news_extract_server}/getnews/{name}")
     news_extract_string = json.loads(news_extract_request.text)
@@ -225,6 +226,7 @@ def getnews(name, max=None):
                     likely_val = val
                 result_dict['sentiment'][key] = f"{val:.2f}%"
             result_dict['likely'] = likely_key
+            result_dict['link'] = f"https://www.google.com/search?q={news['headline']}"
             result_array.append(result_dict)
             result_dict = {}
         result_string = result_array
