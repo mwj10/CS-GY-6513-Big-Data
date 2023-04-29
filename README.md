@@ -14,20 +14,22 @@
 
 ## Prerequisites
 - [Docker](https://docs.docker.com/engine/install/)
+- About `40 minutes` total install time.
 
 ## System Requirements
 ### Minimum
-- 40GB docker virtual disk space
-- 6GB docker memory
+- 40GB docker virtual disk space.
+- 6GB docker memory.
 
 ### Recommeded
-- 60GB docker virtual disk space
-- 12GB docker memory
+- 60GB docker virtual disk space.
+- 12GB docker memory.
 
 ## How To Use
 ### Running a Docker
 - Use the following command* to start a docker.
-- **Caution**: The first time you run the following command. It needs `10 minutes` to run.
+- **Caution**: The first time you run the following command. It requires `10 minutes` to complete.
+- Next time you run it. It needs about `60 seconds` to complete.
 ```
 $docker compose up -d
 ```
