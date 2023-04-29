@@ -8,19 +8,20 @@
 - [Installation](#installation)
     - [Running a Docker](#running-a-docker)
     - [Testing the Docker](#testing-the-docker)
-    - [Seed Database](#installation)
+    - [Seeding Databases](#seeding-databases)
+- [Test Run](#test-run)
 
 ## System Requirements
 ### Minimum
- - 40GB Hard Drive space
- - 8GB Ram  
+- 40GB Hard Drive space
+- 8GB Ram  
 
 ### Recommeded
- - 80GB Hard Drive space
- - 16GB Ram  
+- 80GB Hard Drive space
+- 16GB Ram  
 
 ## Prerequisites
- - [Docker](https://docs.docker.com/engine/install/)
+- [Docker](https://docs.docker.com/engine/install/)
 
 ## Installation
 ### Running a Docker
@@ -48,3 +49,33 @@ docker ps
 ![docker-ps-result](assets/docker_ps.jpg)
 
 ### Testing the Docker
+- Go to http://localhost:8001, you should see
+```
+"result": "News extracting service is running."
+```
+- Go to http://localhost:8002, you should see
+```
+"message": "Sentiment Analysis service is running."
+```
+- Go to http://localhost:8003, you should see
+```
+"message": "LSTM service is running."
+```
+- Go to http://localhost:8004, you should see
+![landing-page](assets/landing_page.jpg)
+
+### Seeding Databases
+Caution: make sure that all containers are running. 
+- Launch http://localhost:8001/seed, wait for a few seconds and you should see
+```
+"message": "News database has been seeded"
+```
+Caution: the following command needs `20 minutes` to complete
+- Launch http://localhost:8003/seed, wait for 20 minutes and you should see
+```
+"message": "News database has been seeded"
+```
+
+## Test Run
+- Simply to go http://localhost:8004 and navigate through the site
+- You can directly go to each quote by specify their symbol, e.g., http://localhost:8004/quote/AAPL (Currently, we only support DOW30)

@@ -10,7 +10,10 @@ app = Flask(__name__)
 tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
 model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
 
-
+@app.route("/")
+@app.route("/index")
+def index():
+    return {"message":"Sentiment Analysis service is running."}
 
 @app.route("/transform")
 def transform_data():
