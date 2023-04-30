@@ -1,42 +1,101 @@
-# Big Data Project Spring '23
-## Setup
-### Install Dokcer
-https://docs.docker.com/engine/install/
+# Group 5 - Big Data Project Spring '23
 
-### Download and Run Postgres Docker Container
-- `docker pull postgres`
-- `docker run --name postgres -e POSTGRES_PASSWORD=123 -d postgres`
+## Contents
+- [Prerequisites](#prerequisites)
+- [System Requirements](#system-requirements)
+    - [Minimum](#minimum)
+    - [Recommeded](#recommeded)
+- [How To Use](#how-to-use)
+    - [Running a Docker](#running-a-docker)
+    - [Testing the Docker](#testing-the-docker)
+    - [Seeding Databases](#seeding-databases)
+    - [Stopping the Docker](#running-a-docker)
+- [Test Run](#test-run)
 
-### Download and Run MangoDB Docker Container
-- `docker pull mongo`
-- `docker run -d -p 27017-27019:27017-27019 --name mango mongo`
+## Prerequisites
+- [Docker](https://docs.docker.com/engine/install/)
+- About `40 minutes` total install time.
 
-## LSTM
-### APIs:
-- Training all models: `/train`
-- Training specific model: `/train/<string:q_ticker>`
-- Data View: `/lstm_data_view/<string:q_ticker>`
-- inference: `/inference/<string:q_ticker>` OR `/inference/<string:q_ticker>?days=5`
+## System Requirements
+### Minimum
+- 40GB docker virtual disk space.
+- 6GB docker memory.
 
-`days` is an optional query parameter referring to the number of inference days requested
+### Recommeded
+- 60GB docker virtual disk space.
+- 12GB docker memory.
 
+## How To Use
+### Running a Docker
+- Use the following command* to start a docker.
+- **Caution**: The first time you run the following command. It requires `10 minutes` to complete.
+- Next time you run it. It needs about `60 seconds` to complete.
+```
+$docker compose up -d
+```
+- *`-d` means we want to launch the docker in a background.
+- You will see a bunch of install messages. Wait until you see the following statement saying containers are started. 
+```
+[+] Running 8/8
+ - Container lstm-postgres                  Started  1.2s
+ - Container frontend-mongo                 Started  0.6s
+ - Container news-sentiment-analysis-mongo  Started  1.2s
+ - Container news-extract-mongo             Started  1.2s
+ - Container lstm-flask                     Started  1.7s
+ - Container news-sentiment-analysis-flask  Started  2.1s
+ - Container frontend-flask                 Started  1.5s
+ - Container news-extract-flask             Started  2.7s
+```
+- After `docker compose up -d` was completed, you can use the following command to check if all of the eight containers are still running.
+```
+docker ps
+```
+![docker-ps-result](assets/docker_ps.jpg)
 
-## Sentiment Analysis
+### Testing the Docker
+- Go to http://localhost:8001, you should see
+```
+"result": "News extracting service is running."
+```
+- Go to http://localhost:8002, you should see
+```
+"message": "Sentiment Analysis service is running."
+```
+- Go to http://localhost:8003, you should see
+```
+"message": "LSTM service is running."
+```
+- Go to http://localhost:8004, you should see
+>![landing-page](assets/landing_page.jpg)
 
-### Dependencies
-python == 3.10
-### Installation
-- `pip install Flask`
-- `pip install transformers`
-- `pip install torch torchvision torchaudio`
-
-### Activate Virtual Environment
-- `. venv/bin/activate`
-
-
-### To Run the Python Scripts
-- To run app.py: with the virtual environment activated, open Terminal and direct to the sentiment-analysis Folder, use the command `flask --app app run`
-- To run local.py: with the virtual environment activated, open Terminal and direct to the sentiment-analysis Folder, use the command `python3 local.py`
-
-
-
+### Seeding Databases
+- **Caution**: make sure that all containers are running. 
+- Launch http://localhost:8001/seed, wait for a few seconds and you should see:
+```
+"message": "News database has been seeded"
+```
+- **Caution**: the following command needs **20 minutes** to complete.
+- Launch http://localhost:8003/seed, wait for **20 minutes** and you should see:
+```
+"message": "News database has been seeded"
+```
+### Stopping the Docker
+- To stop the docker run:
+```
+docker compose down
+```
+- You should see:
+```
+[+] Stopping 8/8
+ - Container lstm-postgres                  Stopped  1.2s
+ - Container frontend-mongo                 Stopped  0.6s
+ - Container news-sentiment-analysis-mongo  Stopped  1.2s
+ - Container news-extract-mongo             Stopped  1.2s
+ - Container lstm-flask                     Stopped  1.7s
+ - Container news-sentiment-analysis-flask  Stopped  2.1s
+ - Container frontend-flask                 Stopped  1.5s
+ - Container news-extract-flask             Stopped  2.7s
+```
+## Test Run
+- Simply to go http://localhost:8004 and navigate through the site.
+- You can directly go to each quote by specify their symbol, e.g., http://localhost:8004/quote/AAPL (Currently, we only support DOW30).
