@@ -40,7 +40,7 @@ def lstm_data_view(q_ticker):
         json_results[int(i)] = {'date': date,
                                 'actual': actual, 'predicted': predicted}
     conn.close()
-    return json.dumps(json_results)
+    return json_results
 
 
 @app.route("/inference/<string:q_ticker>")
@@ -58,7 +58,7 @@ def inference(q_ticker):
         key = "day_{i}".format(i=i)
         value = results[i]
         json_results[key] = value
-    return json.dumps(json_results)
+    return json_results
 
 
 @app.cli.command("db_seed")

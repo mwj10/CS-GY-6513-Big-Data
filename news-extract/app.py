@@ -198,8 +198,8 @@ def extract_yfinance():
 def getnews(q_ticker=None):
 
     today = datetime.datetime.today()
-    # Retreive 4-days old data
-    dates = [(today-datetime.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(5)]
+    # Retreive 9-days old data
+    dates = [(today-datetime.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(10)]
 
     client = MongoClient('news-sentiment-analysis-mongo', 27018) #connect to sentiment db
     db = client.test_db

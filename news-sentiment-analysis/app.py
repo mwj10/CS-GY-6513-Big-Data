@@ -27,10 +27,7 @@ def transform_data():
     start = between - datetime.timedelta(days=1)
     
     dates = [start.strftime('%m-%d-%Y'), between.strftime('%m-%d-%Y'), end.strftime('%m-%d-%Y')]
-    # for dd in dates:
-    #     collection.delete_many({'date': dd})
 
-    # yesterday = ((datetime.datetime.today()) - datetime.timedelta(days=1)).strftime('%m-%d-%Y')
     results = []
     for dd in dates:
         query = {

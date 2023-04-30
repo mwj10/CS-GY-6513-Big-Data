@@ -125,25 +125,30 @@ def human_format(num):
 
 @app.route("/quote/<name>", methods=["GET"])
 @app.route("/quote/<name>/<period>", methods=["GET"])
-def quote(name, period="6mo"):
+def quote(name, period="1mo"):
     m = {'K': 3, 'M': 6, 'B': 9, 'T': 12}
     # print(period)
-    periods = {"1d": "1D",
+    periods = {
+                # "1d": "1D",
                "5d": "5D",
                "1mo": "1M",
                "6mo": "6M",
                "ytd": "YTD",
                "1y": "1Y",
-               "5y": "5Y",
-               "max": "Max"}
-    intervals = {"1d": "1m",
-                 "5d": "15m",  # 15m
-                 "1mo": "90m",
+            #    "5y": "5Y",
+            #    "max": "Max"
+               }
+    
+    intervals = {
+                # "1d": "1m",
+                 "5d": "1d",  # 15m
+                 "1mo": "1d",
                  "6mo": "1d",
                  "ytd": "1d",
                  "1y": "1d",
-                 "5y": "1wk",
-                 "max": "3mo"}
+                #  "5y": "1wk",
+                #  "max": "3mo"
+                 }
     ticker = yf.Ticker(name)
     # print(ticker.shares)
     tick = ticker.info
@@ -182,8 +187,9 @@ def quote(name, period="6mo"):
 
     tick['trailingAnnualDividendYield'] = f"{tick['trailingAnnualDividendYield']*100:.2f}"
 
-    dividendDate = datetime.datetime.fromtimestamp(tick['dividendDate'])
-    tick['dividendDate'] = dividendDate.strftime("%b %d, %Y")
+    if 'dividendDate' in tick:
+        dividendDate = datetime.datetime.fromtimestamp(tick['dividendDate'])
+        tick['dividendDate'] = dividendDate.strftime("%b %d, %Y")
     earningsTimestampStart = datetime.datetime.fromtimestamp(
         tick['earningsTimestampStart'])
     tick['earningsTimestampStart'] = earningsTimestampStart.strftime(
@@ -195,7 +201,58 @@ def quote(name, period="6mo"):
 
     news_setiment_stock = getnews(name)
     news_setiment_blank = getnews("", 3)
-    return render_template("quote.html", title=f"Quote - {tick['longName']} ({name})", name=name, tick=tick, color=color, intervals=intervals, periods=periods, period=period, news_setiment_stock=news_setiment_stock, news_setiment_blank=news_setiment_blank)
+
+    length = 5
+    predict_df, infer_df, _ = get_lstm(name)
+    predict_df = predict_df.tail(length)
+    predict_df = pd.concat([predict_df, infer_df], ignore_index=True).rename(columns={"Actual":"actual", "Date":"date", "Predicted":"predicted"})
+    predict_df["actual_change"] = predict_df.actual.diff(1)
+    predict_df["predicted_change"] = predict_df.predicted.diff(1)
+    predict_df["actual_%change"] = predict_df.actual.pct_change(fill_method="bfill")
+    predict_df["predicted_%change"] = predict_df.predicted.pct_change(fill_method="bfill")
+    predict_df["date"] = pd.to_datetime(predict_df.date).dt.strftime('%d %b')
+    predict_df = predict_df.fillna("")
+    predict_dict = predict_df.to_dict(orient="records")
+    day = 1
+    for i, predict in enumerate(predict_dict):
+        
+        predict['predicted'] = f"{predict['predicted']:.2f}"
+        if i >= length:
+            if i == length:
+                predicted_change = predict['predicted_change']
+            predict['date'] = f"+{day}day"
+            if day != 1:
+                predict['date']  += "s"
+            day += 1
+        else:
+            predict['date'] = predict['date'].replace(" ", "")
+            predict['actual'] = f"{predict['actual']:.2f}"
+
+    # for row in enumerate(news_setiment_blank):
+
+    #     print(row['sentiment'][row['likely']])
+    print (news_setiment_stock)
+    if len(news_setiment_stock) > 0:
+        if predicted_change > 0 and news_setiment_stock[0]['likely'] == 'positive':
+            suggestion = "BUY signal "
+            signal_color = "success"
+            font_color = "light"
+        elif predicted_change < 0 and news_setiment_stock[0]['likely'] == 'negative':
+            suggestion = "SELL signal"
+            signal_color = "danger"
+            font_color = "dark"
+        else:
+            suggestion = "HOLD signal"
+            signal_color = "warning"
+            font_color = "dark"
+    else:
+        suggestion = "HOLD signal"
+        signal_color = "warning"
+        font_color = "dark"
+
+    # news_setiment_stock
+    # print(predict_dict)
+    return render_template("quote.html", title=f"Quote - {tick['longName']} ({name})", name=name, tick=tick, color=color, intervals=intervals, periods=periods, period=period, news_setiment_stock=news_setiment_stock, news_setiment_blank=news_setiment_blank, predict_dict=predict_dict, suggestion=suggestion, signal_color=signal_color, font_color=font_color)
 
 def getnews(name, max=None):
     
@@ -224,7 +281,7 @@ def getnews(name, max=None):
                 if float(val) > likely_val:
                     likely_key = key
                     likely_val = val
-                result_dict['sentiment'][key] = f"{val:.2f}%"
+                result_dict['sentiment'][key] = f"{val*100:.2f}%"
             result_dict['likely'] = likely_key
             result_dict['link'] = f"https://www.google.com/search?q={news['headline']}"
             result_array.append(result_dict)
@@ -245,13 +302,7 @@ def cb(endpoint):
     else:
         return "Bad endpoint", 400
 
-
-# Return the JSON data for the Plotly graph
-def gm(stock, period, interval, color):
-    st = yf.Ticker(stock)
-    # print(period)
-    # print(interval)
-
+def get_lstm(stock):
     # Retrieve API
     # Getting inferencial data
     lstm_server = os.getenv("LSTM_SERVER")
@@ -277,19 +328,29 @@ def gm(stock, period, interval, color):
             td = td+datetime.timedelta(days=1)
         i += 1
 
-    infer_dataframe = pd.DataFrame(infer_array)
+    infer_df = pd.DataFrame(infer_array)
 
     # Getting historical data
     request = requests.get(f"http://{lstm_server}/lstm_data_view/{stock}")
-    js_string = json.loads(request.text)
-
+    # js_string = json.loads(request.text)
+    # print(request.text)
     # Use pandas.DataFrame.from_dict() to Convert JSON to DataFrame
     predict_df = pd.read_json(request.text, orient='index')
     predict_df.columns = ["Actual", "Date", "Predicted"]
     predict_df.Date = predict_df.Date.dt.date
 
+    return predict_df, infer_df, new_datapoint
+
+# Return the JSON data for the Plotly graph
+def gm(stock, period, interval, color):
+    st = yf.Ticker(stock)
+    # print(period)
+    # print(interval)
+
+    predict_df, infer_df, new_datapoint = get_lstm(stock)
+    # print(infer_df)
     # Mix historical and inferencial data
-    predict_df = pd.concat([predict_df, infer_dataframe], ignore_index=True)
+    predict_df = pd.concat([predict_df, infer_df], ignore_index=True)
 
     # Create a line graph
     df = st.history(period=(period), interval=interval)
@@ -309,10 +370,13 @@ def gm(stock, period, interval, color):
     # Merge requested API
     df = pd.merge(df, predict_df, how="left", on="Date")
 
-    max_open = (df['Close'].max())
-    min_open = (df['Close'].min())
+    # print(df)
+
+    max_open = (df['Close'].max() if df['Close'].max() > df['Predicted'].max() else df['Predicted'].max())
+    min_open = (df['Close'].min() if df['Close'].min() < df['Predicted'].min() else df['Predicted'].min())
     range_open = max_open - min_open
-    margin_open = range_open * 0.05
+    # margin_open = range_open * 0.05
+    margin_open = range_open * 0.4
     # margin_open = range_open
     max_open = max_open + margin_open
     min_open = min_open - margin_open
@@ -341,7 +405,7 @@ def gm(stock, period, interval, color):
 
     fig.add_trace(
         go.Scatter(x=df['Date-Time'], y=df["Predicted"],
-                   name="Predicted",
+                   fill='tozeroy', name="Predicted",
                    fillpattern_fillmode="overlay",
                    mode='lines',
                    line=dict(width=0.5, color="blue"),
@@ -363,11 +427,19 @@ def gm(stock, period, interval, color):
     )
 
     fig.update_layout(
-        showlegend=False,
+        showlegend=True,
         margin=dict(l=10, r=0, t=10, b=10),
     )
+    # fig.update_layout(legend=dict(
+    # yanchor="top",
+    # y=0.99,
+    # xanchor="left",
+    # x=0.01
+    # ))
     fig.update_layout(dict(yaxis2={'anchor': 'x', 'overlaying': 'y', 'side': 'left'},
                            yaxis={'anchor': 'x', 'domain': [0.0, 1.0], 'side': 'right'}))
+    
+
     # Set x-axis title
     # print(df['Date-Time'].iloc[1])
     # print(df['Date-Time'].iloc[-1])
@@ -378,8 +450,9 @@ def gm(stock, period, interval, color):
                 # NOTE: Below values are bound (not single values), ie. hide x to y
                 # hide weekends, eg. hide sat to before mon
                 dict(bounds=["sat", "mon"]),
+                # dict(bounds=[15.5, 9.5], pattern="hour"),
                 # hide hours outside of 9.30am-4pm
-                dict(bounds=[15.5, 9.5], pattern="hour"),
+                
                 # dict(values=["2020-12-25", "2021-01-01"])  # hide holidays (Christmas and New Year's, etc)
             ]
         )
@@ -389,8 +462,9 @@ def gm(stock, period, interval, color):
                 # NOTE: Below values are bound (not single values), ie. hide x to y
                 # hide weekends, eg. hide sat to before mon
                 dict(bounds=["sat", "mon"]),
+                # dict(bounds=[16, 9.5], pattern="hour"),
                 # hide hours outside of 9.30am-4pm
-                dict(bounds=[16, 9.5], pattern="hour"),
+               
                 # dict(values=["2020-12-25", "2021-01-01"])  # hide holidays (Christmas and New Year's, etc)
             ]
         )
