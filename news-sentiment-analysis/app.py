@@ -10,6 +10,11 @@ app = Flask(__name__)
 tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
 model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
 
+today = datetime.datetime.today()
+# Retreive 9-days old data
+dates = [(today-datetime.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(10)]
+
+
 @app.route("/")
 @app.route("/index")
 def index():
@@ -22,25 +27,25 @@ def transform_data():
     db = client.test_db
     collection = db.test
     #load data from yesterday
-    end = (datetime.datetime.today()) - datetime.timedelta(days=2)
-    between = end - datetime.timedelta(days=1)
-    start = between - datetime.timedelta(days=1)
+    # end = (datetime.datetime.today()) - datetime.timedelta(days=2)
+    # between = end - datetime.timedelta(days=1)
+    # start = between - datetime.timedelta(days=1)
     
-    dates = [start.strftime('%m-%d-%Y'), between.strftime('%m-%d-%Y'), end.strftime('%m-%d-%Y')]
+    # dates = [start.strftime('%m-%d-%Y'), between.strftime('%m-%d-%Y'), end.strftime('%m-%d-%Y')]
 
     results = []
     for dd in dates:
         query = {
             'date': dd
         }
-        print(f"transform {dd}")
+        # print(f"transform {dd}")
         collection = db.test
         data = collection.find(query, {'_id':0})
         data_to_transform = []
         #initialize new collection in extraction db for transformed data
         collection = db.transformedData
         for t in data:
-            print(t)
+            # print(t)
             """
             There are two kinds of data: 1. Stock Market, 2. Company Specifics
             For stock market data, we take as is. 
@@ -76,16 +81,16 @@ def hello_world():
     # client = MongoClient('mongodb://localhost:27017') #connect to extraction db
     db = client.test_db
     collection = db.transformedData
-    end = (datetime.datetime.today()) - datetime.timedelta(days=2)
-    between = end - datetime.timedelta(days=1)
-    start = between - datetime.timedelta(days=1)
+    # end = (datetime.datetime.today()) - datetime.timedelta(days=2)
+    # between = end - datetime.timedelta(days=1)
+    # start = between - datetime.timedelta(days=1)
     
-    dates = [start.strftime('%m-%d-%Y'), between.strftime('%m-%d-%Y'), end.strftime('%m-%d-%Y')]
+    # dates = [start.strftime('%m-%d-%Y'), between.strftime('%m-%d-%Y'), end.strftime('%m-%d-%Y')]
 
     # yesterday = ((datetime.datetime.today()) - datetime.timedelta(days=1)).strftime('%m-%d-%Y')
     results = []
     for dd in dates:
-        print(f"sentiment {dd}")
+        # print(f"sentiment {dd}")
         query = {
             'date': dd
         }
@@ -95,7 +100,7 @@ def hello_world():
             transformed_data.append(t)
         
         data  = defaultdict(dict)
-        print(transformed_data)
+        # print(transformed_data)
         for i in range(len(transformed_data)):
             if transformed_data[i]['date'] not in data:
                 data[ transformed_data[i]['date'] ] = {}
