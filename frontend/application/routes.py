@@ -83,7 +83,8 @@ def index(search=""):
         currentPrice = info[stock]['currentPrice']
         previousClose = info[stock]['previousClose']
         regularMarketPreviousClose = info[stock]['regularMarketPreviousClose']
-        regularMarketChangePercent = (currentPrice - regularMarketPreviousClose) / currentPrice
+        regularMarketChange = (currentPrice - regularMarketPreviousClose) 
+        regularMarketChangePercent =  (regularMarketChange / regularMarketPreviousClose) * 100
         info[stock]['regularMarketChangePercent'] = regularMarketChangePercent
 
         if info[stock]['regularMarketChangePercent'] > 0:
