@@ -67,6 +67,7 @@ def index(search=""):
     stocks = rand_news(num_news)
     all_stocks = all_stock()
     tickers = yf.Tickers(" ".join(stocks))
+    # print(tickers)
     info = {}
     news = {}
     for stock in stocks:
@@ -79,6 +80,12 @@ def index(search=""):
         # lastHourDateTime = datetime.datetime.now() - datetime.datetime.fromtimestamp(news[stock][0]['providerPublishTime'])
         news[stock][0]['providerPublishTime'] = ago(
             datetime.datetime.fromtimestamp(news[stock][0]['providerPublishTime']))
+        currentPrice = info[stock]['currentPrice']
+        previousClose = info[stock]['previousClose']
+        regularMarketPreviousClose = info[stock]['regularMarketPreviousClose']
+        regularMarketChangePercent = (currentPrice - regularMarketPreviousClose) / currentPrice
+        info[stock]['regularMarketChangePercent'] = regularMarketChangePercent
+
         if info[stock]['regularMarketChangePercent'] > 0:
             info[stock]['regularMarketChangePercentText'] = f"+{info[stock]['regularMarketChangePercent']:.2f}%"
         else:
@@ -153,7 +160,18 @@ def quote(name, period="1mo"):
     # print(ticker.shares)
     tick = ticker.info
     # print(tick)
-    tick['regularMarketPrice'] = f"{tick['regularMarketPrice']:.2f}"
+
+    currentPrice = tick['currentPrice']
+    previousClose = tick['previousClose']
+    regularMarketPreviousClose = tick['regularMarketPreviousClose']
+    regularMarketChange = (currentPrice - regularMarketPreviousClose) 
+    regularMarketChangePercent =  (regularMarketChange / regularMarketPreviousClose) * 100
+    tick['regularMarketChange'] = regularMarketChange
+    tick['regularMarketChangePercent'] = regularMarketChangePercent
+    # tick['regularMarketPrice'] = f"{tick['regularMarketPrice']:.2f}"
+
+
+    tick['regularMarketPrice'] = f"{tick['currentPrice']:.2f}"
 
     if tick['regularMarketChange'] >= 0:
         color = "success"
@@ -168,15 +186,19 @@ def quote(name, period="1mo"):
     # print(tick['askSize'])
     tick['bid'] = f"{tick['bid']:.2f}"
     tick['ask'] = f"{tick['ask']:.2f}"
-    tick['bidSize'] = f"{tick['bidSize'] * 100}"
-    tick['askSize'] = f"{tick['askSize'] * 100}"
+    tick['bidSize'] = f"{tick['bidSize']}"
+    tick['askSize'] = f"{tick['askSize']}"
 
-    regularMarketDayRange = tick['regularMarketDayRange'].split("-")
-    tick['regularMarketDayRange'] = f"{float(regularMarketDayRange[0].strip()):.2f} - {float(regularMarketDayRange[1].strip()):.2f}"
-    fiftyTwoWeekRange = tick['fiftyTwoWeekRange'].split("-")
-    tick['fiftyTwoWeekRange'] = f"{float(fiftyTwoWeekRange[0].strip()):.2f} - {float(fiftyTwoWeekRange[1].strip()):.2f}"
+    # regularMarketDayRange = tick['regularMarketDayRange'].split("-")
+    # tick['regularMarketDayRange'] = f"{float(regularMarketDayRange[0].strip()):.2f} - {float(regularMarketDayRange[1].strip()):.2f}"
+    tick['regularMarketDayRange']  = f"{tick['regularMarketDayLow']:.2f} - {tick['regularMarketDayHigh']:.2f}"
+    # fiftyTwoWeekRange = tick['fiftyTwoWeekRange'].split("-")
+    # tick['fiftyTwoWeekRange'] = f"{float(fiftyTwoWeekRange[0].strip()):.2f} - {float(fiftyTwoWeekRange[1].strip()):.2f}"
+    tick['fiftyTwoWeekRange'] = f"{tick['fiftyTwoWeekLow']:.2f} - {tick['fiftyTwoWeekHigh']:.2f}"
     tick['regularMarketVolume'] = f"{tick['regularMarketVolume']:,}"
-    tick['averageDailyVolume3Month'] = f"{tick['averageDailyVolume3Month']:,}"
+    # tick['averageDailyVolume3Month'] = f"{tick['averageDailyVolume3Month']:,}"
+    tick['averageDailyVolume10Day'] = f"{tick['averageDailyVolume10Day']:,}"
+    
 
     tick['regularMarketPreviousClose'] = f"{tick['regularMarketPreviousClose']:.2f}"
     tick['marketCap'] = f"{human_format(tick['marketCap'])}"
@@ -187,16 +209,23 @@ def quote(name, period="1mo"):
 
     tick['trailingAnnualDividendYield'] = f"{tick['trailingAnnualDividendYield']*100:.2f}"
 
-    if 'dividendDate' in tick:
-        dividendDate = datetime.datetime.fromtimestamp(tick['dividendDate'])
-        tick['dividendDate'] = dividendDate.strftime("%b %d, %Y")
-    earningsTimestampStart = datetime.datetime.fromtimestamp(
-        tick['earningsTimestampStart'])
-    tick['earningsTimestampStart'] = earningsTimestampStart.strftime(
-        "%b %d, %Y")
-    earningsTimestampEnd = datetime.datetime.fromtimestamp(
-        tick['earningsTimestampEnd'])
-    tick['earningsTimestampEnd'] = earningsTimestampEnd.strftime("%b %d, %Y")
+    if 'exDividendDate' in tick:
+        dividendDate = datetime.datetime.fromtimestamp(tick['exDividendDate'])
+        tick['exDividendDate'] = dividendDate.strftime("%b %d, %Y")
+
+    if 'beta' in tick:
+        tick['beta'] = f"{tick['beta']:.2f}"
+    
+    metaData = ticker.history_metadata
+
+    tick["regularMarketTime"] = f"{metaData['regularMarketTime'].strftime('%b %d %I:%M%p')} {metaData['timezone']}"
+    # earningsTimestampStart = datetime.datetime.fromtimestamp(
+    #     tick['earningsTimestampStart'])
+    # tick['earningsTimestampStart'] = earningsTimestampStart.strftime(
+    #     "%b %d, %Y")
+    # earningsTimestampEnd = datetime.datetime.fromtimestamp(
+    #     tick['earningsTimestampEnd'])
+    # tick['earningsTimestampEnd'] = earningsTimestampEnd.strftime("%b %d, %Y")
 
 
     news_setiment_stock = getnews(name)
@@ -231,7 +260,7 @@ def quote(name, period="1mo"):
     # for row in enumerate(news_setiment_blank):
 
     #     print(row['sentiment'][row['likely']])
-    print (news_setiment_stock)
+    # print (news_setiment_stock)
     if len(news_setiment_stock) > 0:
         if predicted_change > 0 and news_setiment_stock[0]['likely'] == 'positive':
             suggestion = "BUY signal "

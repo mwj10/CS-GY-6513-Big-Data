@@ -279,11 +279,13 @@ def seed():
 
     local_dates = [date.strftime('%m-%d-%Y') for date in dates]
 
-
+    
     collection = db.test
+    collection.delete_many({'source': 'yfinance'})
     for dd in local_dates:
         collection.delete_many({'date': dd})
     collection = db.transformedData
+    collection.delete_many({'source': 'yfinance'})
     for dd in local_dates:
         collection.delete_many({'date': dd})
 
@@ -303,6 +305,7 @@ def seed():
     client2 = MongoClient('news-sentiment-analysis-mongo', 27018)
     db2 = client2.test_db
     collection2 = db2.test
+    collection2.delete_many({'source': 'yfinance'})
     for dd in local_dates:
         collection2.delete_many({'date': dd})
 
