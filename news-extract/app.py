@@ -36,11 +36,17 @@ search_terms = [
 ticker_search = [
     "AAPL",	"AMGN",	"AXP",	"BA",	"CAT",	"CRM",	"CSCO",	"CVX",	"DIS",	"DOW",	"GS",	"HD",	"HON",	"IBM",	"INTC",	"JNJ",	"JPM",	"KO",	"MCD",	"MMM",	"MRK",	"MSFT",	"NKE",	"PG",	"TRV",	"UNH",	"V",	"VZ",	"WBA",	"WMT"
 ]
+
 ticker_to_company = {}
 company_to_ticker = {}
 for i in range(len(search_terms)):
     ticker_to_company[ticker_search[i]] = search_terms[i]
     company_to_ticker[search_terms[i]] = ticker_search[i]
+
+
+today = datetime.datetime.today()
+# Retreive 9-days old data
+dates = [(today-datetime.timedelta(days=i)) for i in range(10)] #1 day old
 
 @app.route("/")
 def index():
@@ -55,12 +61,14 @@ def extract_nyt():
     news to the Companies collection. Otherwise we only send data to Stock Market collections
     """
     
-    end = (datetime.datetime.today()) - datetime.timedelta(days=2)
-    start = end - datetime.timedelta(days=2)
-    start, end = start.strftime('%Y%m%d'), end.strftime('%Y%m%d')
+    # end = (datetime.datetime.today()) - datetime.timedelta(days=2)
+    # start = end - datetime.timedelta(days=2)
+    # start, end = start.strftime('%Y%m%d'), end.strftime('%Y%m%d')
+    start, end = dates[0].strftime('%Y%m%d'), dates[-1].strftime('%Y%m%d')
     # print(start, end)
     search_term = "Stock Market"
     query = f"https://api.nytimes.com/svc/search/v2/articlesearch.json?q={search_term}&begin_date={start}&end_date={end}&page=0&api-key={KEY}"
+    # print(query)
     res = requests.get(query)
     response = res.json()
     msg = defaultdict(dict)
@@ -91,9 +99,10 @@ def extract_nyt_main():
     For this, what we'll do is for every news, if there is an entity within our Dow30, we'll also send that
     news to the Companies collection. Otherwise we only send data to Stock Market collections
     """
-    end = (datetime.datetime.today()) - datetime.timedelta(days=2)
-    start = end - datetime.timedelta(days=2)
-    start, end = start.strftime('%Y%m%d'), end.strftime('%Y%m%d')
+    # end = (datetime.datetime.today()) - datetime.timedelta(days=2)
+    # start = end - datetime.timedelta(days=2)
+    # start, end = start.strftime('%Y%m%d'), end.strftime('%Y%m%d')
+    start, end = dates[0].strftime('%Y%m%d'), dates[-1].strftime('%Y%m%d')
 
     collection = db.test
 
@@ -105,7 +114,7 @@ def extract_nyt_main():
 
         stock_market_data = []
         if 'response' in response.keys():
-            print(search_term)
+            # print(search_term)
             for doc in response['response']['docs']:
                 date = formatDate(doc['pub_date'])
                 newsNER = extractFromNews(doc['lead_paragraph'])
@@ -117,10 +126,10 @@ def extract_nyt_main():
 
             try:
                 collection.insert_many(list(stock_market_data))
-                print("success")
+                # print("success")
             except:
                 pass
-                print("error (nothing to insert)")
+                # print("error (nothing to insert)")
 
     return {
         "message": "success"
@@ -129,9 +138,12 @@ def extract_nyt_main():
 
 @app.route("/mediastack-gen")
 def mediastackGeneral():
-    end = (datetime.datetime.today()) - datetime.timedelta(days=2)
-    start = end - datetime.timedelta(days=2)
-    start_end = f"{start.strftime('%Y-%m-%d')},{end.strftime('%Y-%m-%d')}"
+    # end = (datetime.datetime.today()) - datetime.timedelta(days=2)
+    # start = end - datetime.timedelta(days=2)
+    # start_end = f"{start.strftime('%Y-%m-%d')},{end.strftime('%Y-%m-%d')}"
+
+    start_end = f"{dates[0].strftime('%Y-%m-%d')},{dates[-1].strftime('%Y-%m-%d')}"
+
     params = urllib.parse.urlencode({
         'access_key': secretMediaStack,
         'keyword': 'Stock Market',
@@ -197,18 +209,15 @@ def extract_yfinance():
 @app.route("/getnews/<string:q_ticker>")
 def getnews(q_ticker=None):
 
-    today = datetime.datetime.today()
-    # Retreive 9-days old data
-    dates = [(today-datetime.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(10)]
-
     client = MongoClient('news-sentiment-analysis-mongo', 27018) #connect to sentiment db
     db = client.test_db
     collection = db.test
-    cursor = collection.find({'date': { '$in': dates }}).sort("date", -1)
+    local_dates = [date.strftime('%m-%d-%Y') for date in dates]
+    cursor = collection.find({'date': { '$in': local_dates }}).sort("date", -1)
     json_collection_arr = []
     json_collection_dict = {}
     for row in cursor:
-        print(row)
+        # print(row)
         for key, val in row['data'].items():
             # json_result[key] = val
             # print(key)
@@ -262,16 +271,22 @@ def seed():
     client = MongoClient('news-extract-mongo', 27019)
     db = client.test_db
     
-    end = (datetime.datetime.today()) - datetime.timedelta(days=2)
-    between = end - datetime.timedelta(days=1)
-    start = between - datetime.timedelta(days=1)
+    # end = (datetime.datetime.today()) - datetime.timedelta(days=2)
+    # between = end - datetime.timedelta(days=1)
+    # start = between - datetime.timedelta(days=1)
     
-    dates = [start.strftime('%m-%d-%Y'), between.strftime('%m-%d-%Y'), end.strftime('%m-%d-%Y')]
+    # dates = [start.strftime('%m-%d-%Y'), between.strftime('%m-%d-%Y'), end.strftime('%m-%d-%Y')]
+
+    local_dates = [date.strftime('%m-%d-%Y') for date in dates]
+
+    
     collection = db.test
-    for dd in dates:
+    collection.delete_many({'source': 'yfinance'})
+    for dd in local_dates:
         collection.delete_many({'date': dd})
     collection = db.transformedData
-    for dd in dates:
+    collection.delete_many({'source': 'yfinance'})
+    for dd in local_dates:
         collection.delete_many({'date': dd})
 
     endpoints = [
@@ -284,38 +299,38 @@ def seed():
     for endpt in endpoints:
         url = f"http://news-extract-flask:8001"+endpt
         response = requests.get(url)
-        print(f"{endpt} - {response.json()}")
+        # print(f"{endpt} - {response.json()}")
 
 
     client2 = MongoClient('news-sentiment-analysis-mongo', 27018)
     db2 = client2.test_db
     collection2 = db2.test
-    for dd in dates:
+    collection2.delete_many({'source': 'yfinance'})
+    for dd in local_dates:
         collection2.delete_many({'date': dd})
 
-    # make sure the sentiment-analysis flask app is listening on port 8002
+    # call endpoint to run transform
     url = 'http://news-sentiment-analysis-flask:8002/transform'
 
     response = requests.get(url)
 
-    print(response)
+    # print(response)
 
     # call endpoint to run sentiment
-    # make sure the extraction flask app is listening on port 8001
     url = 'http://news-sentiment-analysis-flask:8002/sentiment'
 
     response = requests.get(url)
 
-    print(response)
+    # print(response)
 
     # Test access data
     # connect to sentiment db
     
-    client2 = MongoClient('news-sentiment-analysis-mongo', 27018)
-    db = client2.test_db
-    collection = db.test
-    for doc in collection.find():
-        print(doc)
+    # client2 = MongoClient('news-sentiment-analysis-mongo', 27018)
+    # db = client2.test_db
+    # collection = db.test
+    # for doc in collection.find():
+    #     print(doc)
 
     return {
         'message': 'News database has been seeded'

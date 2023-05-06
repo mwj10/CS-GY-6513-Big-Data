@@ -29,7 +29,7 @@ def lstm_data_view(q_ticker):
     conn = db.connectToDB()
     # print(db.getPredictions(q_ticker,conn).shape)
     df = db.getPrices(q_ticker, conn)
-    print(df)
+    # print(df)
     json_results = {}
     for i, row in df.iterrows():
         date = row['date'].strftime('%m/%d/%Y')
@@ -66,7 +66,7 @@ def inference(q_ticker):
 def seed():
     # Download data
     today = date.today()
-    print(today)
+    # print(today)
     # print(ticker_info.dow30)
     dl.download(ticker_info.dow30, '2013-01-01', today, force=True)
     # dl.download(ticker_info.dow30, '1900-01-01', today, force=True)
@@ -74,10 +74,10 @@ def seed():
     conn = db.connectToDB()
 
     tickers = db.getTickers(conn)
-    print(tickers)
+    # print(tickers)
 
     for ticker in tickers:
-        print(ticker)
+        # print(ticker)
         lstm.train(ticker)
 
     return {
