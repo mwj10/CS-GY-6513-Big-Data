@@ -11,8 +11,8 @@ tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
 model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
 
 today = datetime.datetime.today()
-# Retreive 9-days old data
-dates = [(today-datetime.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(10)]
+# Retreive 1-days old data
+dates = [(today-datetime.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(1)]
 
 
 @app.route("/")

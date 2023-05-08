@@ -10,7 +10,7 @@ services:
     # (default stop signal from Compose is SIGTERM)
     stop_signal: SIGINT
     environment:
-      FLASK_DEBUG: True
+      FLASK_DEBUG: False
       FLASK_RUN_HOST: "0.0.0.0"
       FLASK_APP: main.py
       FLASK_RUN_PORT: 8004
@@ -38,7 +38,7 @@ services:
     container_name: news-extract-flask
     stop_signal: SIGINT
     environment:
-      FLASK_DEBUG: True
+      FLASK_DEBUG: False
       FLASK_RUN_HOST: "0.0.0.0"
       FLASK_APP: app.py
       FLASK_RUN_PORT: 8001
@@ -63,7 +63,7 @@ services:
     container_name: news-sentiment-analysis-flask
     stop_signal: SIGINT
     environment:
-      FLASK_DEBUG: True
+      FLASK_DEBUG: False
       FLASK_RUN_HOST: "0.0.0.0"
       FLASK_APP: app.py
       FLASK_RUN_PORT: 8002
@@ -85,7 +85,7 @@ services:
     container_name: lstm-flask
     stop_signal: SIGINT
     environment:
-      FLASK_DEBUG: True
+      FLASK_DEBUG: False
       FLASK_RUN_HOST: "0.0.0.0"
       FLASK_APP: main.py
       FLASK_RUN_PORT: 8003

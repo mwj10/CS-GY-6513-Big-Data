@@ -23,18 +23,25 @@ db = client.test_db
 collection = db.test
 
 app = Flask(__name__)
+
 search_terms = [
     "Apple", "Amgen", "American Express", "Boeing", "Caterpillar",
-    "Salesforce",	"Cisco Systems", "Chevron",	"Walt Disney",
-    "Dow",	"Goldman Sachs Group", "Home Depot",
+    "Salesforce", "Cisco Systems", "Cisco", "Chevron", "Walt Disney", "Disney",
+    "Dow", "DJI", "Goldman Sachs Group", "Goldman Sachs", "Home Depot",
     "Honeywell International",	"IBM",
-    "Intel", "Johnson & Johnson", "JP Morgan", "Coca-Cola",
+    "Intel", "Johnson & Johnson", "J&J", "JP Morgan", "J.P. Morgan", "Coca-Cola",
     "McDonalds", "3M Company", "Merck & Company",
-    "Microsoft", "Nike", "Procter & Gamble", "The Travelers",	"United Health Group", "Visa",
-    "Verizon Communications",	"Walgreens", "Walmart"
+    "Microsoft", "Nike", "Procter & Gamble", "P&G", "Travelers Companies", "The Travelers",	"United Health Group", "UnitedHealth", "Visa",
+    "Verizon Communications", "Verizon", "Walgreens", "Walmart"
 ]
 ticker_search = [
-    "AAPL",	"AMGN",	"AXP",	"BA",	"CAT",	"CRM",	"CSCO",	"CVX",	"DIS",	"DOW",	"GS",	"HD",	"HON",	"IBM",	"INTC",	"JNJ",	"JPM",	"KO",	"MCD",	"MMM",	"MRK",	"MSFT",	"NKE",	"PG",	"TRV",	"UNH",	"V",	"VZ",	"WBA",	"WMT"
+    "AAPL",	"AMGN",	"AXP",	"BA",	"CAT",	
+    "CRM",	"CSCO",	"CSCO",	"CVX",	"DIS",	"DIS",	
+    "DOW", "DOW", "GS", "GS", "HD",	
+    "HON",	"IBM", 
+    "INTC",	"JNJ", "JNJ", "JPM", "JPM", "KO", 
+    "MCD", "MMM", "MRK",
+    "MSFT",	"NKE", "PG", "PG", "TRV", "TRV", "UNH", "UNH", "V", "VZ", "VZ", "WBA", "WMT"
 ]
 
 ticker_to_company = {}
@@ -43,10 +50,14 @@ for i in range(len(search_terms)):
     ticker_to_company[ticker_search[i]] = search_terms[i]
     company_to_ticker[search_terms[i]] = ticker_search[i]
 
+print(ticker_to_company)
+print(company_to_ticker)
 
 today = datetime.datetime.today()
-# Retreive 9-days old data
-dates = [(today-datetime.timedelta(days=i)) for i in range(10)] #1 day old
+# Retreive 1-days old data
+# mediastack only allow to retrieve 1 day old news
+dates = [(today-datetime.timedelta(days=i)) for i in range(1)] #1 day old
+# print(dates)
 
 @app.route("/")
 def index():
@@ -187,13 +198,22 @@ def extract_yfinance():
     for ticker in ticker_search:
         t = yf.Ticker(ticker)
         for news in t.news:
+            # print(news)
             newsNER = extractFromNews(news['title'])
-            news_data = {
-                'date': datetime.datetime.fromtimestamp(news['providerPublishTime']).strftime("%m-%d-%Y"),
-                'news': newsNER[0], 'entities': newsNER[1],
-                'search_term': ticker_to_company[ticker], 'source': 'yfinance', 'symbol': ticker
-            }
-        stock_market_data.append(news_data)
+            today_date = dates[0].strftime("%m-%d-%Y")
+            # print("Today: ", today_date)
+            news_date = datetime.datetime.fromtimestamp(news['providerPublishTime']).strftime("%m-%d-%Y")
+            # print("News date: ",news_date)
+            if today_date == news_date:
+                # print("Today news")
+                # print("Current Date", datetime.datetime.fromtimestamp(news['providerPublishTime']).strftime("%m-%d-%Y"))
+                news_data = {
+                    'date': news_date,
+                    'news': newsNER[0], 'entities': newsNER[1],
+                    'search_term': ticker_to_company[ticker], 'source': 'yfinance', 'symbol': ticker
+                }
+                if news_data not in stock_market_data:
+                    stock_market_data.append(news_data)
     try:
         collection.insert_many(list(stock_market_data))
         return {
@@ -212,7 +232,9 @@ def getnews(q_ticker=None):
     client = MongoClient('news-sentiment-analysis-mongo', 27018) #connect to sentiment db
     db = client.test_db
     collection = db.test
-    local_dates = [date.strftime('%m-%d-%Y') for date in dates]
+    # 30 days old 
+    get_news_dates = [(today-datetime.timedelta(days=i)) for i in range(31)]
+    local_dates = [date.strftime('%m-%d-%Y') for date in get_news_dates]
     cursor = collection.find({'date': { '$in': local_dates }}).sort("date", -1)
     json_collection_arr = []
     json_collection_dict = {}
@@ -266,7 +288,7 @@ def test():
 @app.cli.command('db_seed')
 @app.route("/seed")
 def seed():
-
+    print("News seeding begin")
     # lets start with the extractionDB
     client = MongoClient('news-extract-mongo', 27019)
     db = client.test_db
@@ -281,11 +303,12 @@ def seed():
 
     
     collection = db.test
-    collection.delete_many({'source': 'yfinance'})
+    # collection.delete_many({'source': 'yfinance'})
     for dd in local_dates:
         collection.delete_many({'date': dd})
+        
     collection = db.transformedData
-    collection.delete_many({'source': 'yfinance'})
+    # collection.delete_many({'source': 'yfinance'})
     for dd in local_dates:
         collection.delete_many({'date': dd})
 
@@ -305,7 +328,7 @@ def seed():
     client2 = MongoClient('news-sentiment-analysis-mongo', 27018)
     db2 = client2.test_db
     collection2 = db2.test
-    collection2.delete_many({'source': 'yfinance'})
+    # collection2.delete_many({'source': 'yfinance'})
     for dd in local_dates:
         collection2.delete_many({'date': dd})
 

@@ -229,8 +229,8 @@ def quote(name, period="1mo"):
     # tick['earningsTimestampEnd'] = earningsTimestampEnd.strftime("%b %d, %Y")
 
 
-    news_setiment_stock = getnews(name)
-    news_setiment_blank = getnews("", 3)
+    news_setiment_stock = getnews(name, 1, rand=False)
+    news_setiment_blank = getnews("", 3, rand=True)
 
     length = 5
     predict_df, infer_df, _ = get_lstm(name)
@@ -284,7 +284,7 @@ def quote(name, period="1mo"):
     # print(predict_dict)
     return render_template("quote.html", title=f"Quote - {tick['longName']} ({name})", name=name, tick=tick, color=color, intervals=intervals, periods=periods, period=period, news_setiment_stock=news_setiment_stock, news_setiment_blank=news_setiment_blank, predict_dict=predict_dict, suggestion=suggestion, signal_color=signal_color, font_color=font_color)
 
-def getnews(name, max=None):
+def getnews(name, max=None, rand=False):
     
     news_extract_server = os.getenv("NEWS_EXTRACT_SERVER")
     news_extract_request = requests.get(f"http://{news_extract_server}/getnews/{name}")
@@ -293,8 +293,10 @@ def getnews(name, max=None):
     result_array = []
     result_dict = {}
     pick_list = None
-    if max is not None:
-        pick_list = [random.randint(0, len(news_extract_string)) for i in range(max)]
+    if max is not None and rand == True:
+        pick_list = [random.randint(0, len(news_extract_string)+1) for i in range(max)]
+    elif max is not None and rand == False:
+        news_extract_string = news_extract_string[0:max]
     # print(f"pick list {pick_list}")
     if news_extract_string is not None:
         for c, news in enumerate(news_extract_string):
@@ -303,6 +305,8 @@ def getnews(name, max=None):
                     continue
             result_dict = news_extract_string[c]
             ag = ago(datetime.datetime.strptime(news['date'], '%m-%d-%Y'))
+            if "hours" in ag:
+                ag = "latest news"
             result_dict['date'] = ag
             likely_key = ""
             likely_val = -1
